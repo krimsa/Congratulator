@@ -7,10 +7,9 @@ public class Main {
     public static void main(String[] args) {
         DatabaseManager dbManager = new DatabaseManager();
         Menu menu = new Menu(dbManager);
-
         try {
             dbManager.connect();
-            menu.showTodayAndUpcomingBirthdays();  // По умолчанию выводим ближайшие ДР
+            menu.showTodayAndUpcomingBirthdays();  // При запуске выводим ближайшие ДР
             menu.showMainMenu();
             dbManager.close();
         } catch (SQLException | IOException e) {

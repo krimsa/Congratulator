@@ -12,6 +12,8 @@ public class Menu {
     private final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     private final DatabaseManager dbManager;
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
     public Menu(DatabaseManager dbManager) {
         this.dbManager = dbManager;
     }
@@ -65,7 +67,8 @@ public class Menu {
             System.out.println("Список пуст.");
         } else {
             for (Person p : allBirthdays) {
-                System.out.printf("%d. %s - %s\n", p.getId(), p.getName(), p.getBirthday().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                System.out.printf("%d. %s - %s\n", p.getId(), p.getName(),
+                        p.getBirthday().format(FORMATTER));
             }
         }
     }
@@ -78,7 +81,8 @@ public class Menu {
             System.out.println("Нет предстоящих дней рождения.");
         } else {
             for (Person p : upcomingBirthdays) {
-                System.out.printf("%d. %s - %s\n", p.getId(), p.getName(), p.getBirthday().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                System.out.printf("%d. %s - %s\n", p.getId(), p.getName(),
+                        p.getBirthday().format(FORMATTER));
             }
         }
     }
@@ -91,8 +95,7 @@ public class Menu {
         System.out.print("Дата рождения (ДД.ММ.ГГГГ): ");
         String dateStr = reader.readLine();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        LocalDate birthday = LocalDate.parse(dateStr, formatter);
+        LocalDate birthday = LocalDate.parse(dateStr, FORMATTER);
 
         Person person = new Person(-1, name, birthday);
         dbManager.addBirthday(person);
@@ -117,11 +120,10 @@ public class Menu {
             oldPerson.setName(newName);
         }
 
-        System.out.print("Новая дата рождения [" + oldPerson.getBirthday().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) + "]: ");
+        System.out.print("Новая дата рождения [" + oldPerson.getBirthday().format(FORMATTER) + "]: ");
         String newDateStr = reader.readLine();
         if (!newDateStr.isBlank()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-            LocalDate newDate = LocalDate.parse(newDateStr, formatter);
+            LocalDate newDate = LocalDate.parse(newDateStr, FORMATTER);
             oldPerson.setBirthday(newDate);
         }
 
@@ -146,7 +148,7 @@ public class Menu {
         System.out.println("Запись удалена.");
     }
 
-    // Вспомогательный метод для поиска записи по ID
+    // Вспомогательный метод для поиска записи в БД по ID
     private Person findById(int id) throws SQLException {
         List<Person> allBirthdays = dbManager.getAllBirthdays();
 
