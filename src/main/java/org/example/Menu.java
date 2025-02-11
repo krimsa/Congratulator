@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 public class Menu {
@@ -92,10 +93,20 @@ public class Menu {
         System.out.print("Имя: ");
         String name = reader.readLine();
 
-        System.out.print("Дата рождения (ДД.ММ.ГГГГ): ");
-        String dateStr = reader.readLine();
+        boolean validInput = false;
+        LocalDate birthday = null;
 
-        LocalDate birthday = LocalDate.parse(dateStr, FORMATTER);
+        do {
+            try {
+                System.out.print("Дата рождения (ДД.ММ.ГГГГ): ");
+                String dateStr = reader.readLine();
+
+                birthday = LocalDate.parse(dateStr, FORMATTER);
+                validInput = true;
+            } catch (DateTimeParseException e) {
+                System.out.println("Некорректный формат даты. Пожалуйста, введите дату в формате ДД.ММ.ГГГГ.");
+            }
+        } while (!validInput);
 
         Person person = new Person(-1, name, birthday);
         dbManager.addBirthday(person);
@@ -120,12 +131,22 @@ public class Menu {
             oldPerson.setName(newName);
         }
 
-        System.out.print("Новая дата рождения [" + oldPerson.getBirthday().format(FORMATTER) + "]: ");
-        String newDateStr = reader.readLine();
-        if (!newDateStr.isBlank()) {
-            LocalDate newDate = LocalDate.parse(newDateStr, FORMATTER);
-            oldPerson.setBirthday(newDate);
-        }
+        boolean validInput = false;
+        LocalDate newDate = null;
+
+        do {
+            try {
+                System.out.print("Новая дата рождения [" + oldPerson.getBirthday().format(FORMATTER) + "]: ");
+                String newDateStr = reader.readLine();
+
+                newDate = LocalDate.parse(newDateStr, FORMATTER);
+                validInput = true;
+            } catch (DateTimeParseException e) {
+                System.out.println("Некорректный формат даты. Пожалуйста, введите дату в формате ДД.ММ.ГГГГ.");
+            }
+        } while (!validInput);
+
+        oldPerson.setBirthday(newDate);
 
         dbManager.updateBirthday(oldPerson);
 
