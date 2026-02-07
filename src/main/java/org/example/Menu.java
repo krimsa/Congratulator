@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.time.MonthDay;
+import java.util.Comparator;
 
 public class Menu {
     private final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -19,7 +21,6 @@ public class Menu {
         this.dbManager = dbManager;
     }
 
-    // Метод для отображения главного меню
     public void showMainMenu() throws IOException, SQLException {
         boolean running = true;
 
@@ -60,21 +61,40 @@ public class Menu {
         }
     }
 
-    // Метод для показа всех дней рождения
     private void showAllBirthdays() throws SQLException {
         List<Person> allBirthdays = dbManager.getAllBirthdays();
 
         if (allBirthdays.isEmpty()) {
             System.out.println("Список пуст.");
-        } else {
-            for (Person p : allBirthdays) {
-                System.out.printf("%d. %s - %s\n", p.getId(), p.getName(),
-                        p.getBirthday().format(FORMATTER));
+            return;
+        }
+
+        // Сортировка по месяцу и дню (игнорируя год)
+        allBirthdays.sort(Comparator.comparing(p -> MonthDay.from(p.getBirthday())));
+
+        // Получаем текущий месяц и день для сравнения
+        MonthDay currentMd = MonthDay.now();
+
+        for (Person p : allBirthdays) {
+            MonthDay personMd = MonthDay.from(p.getBirthday());
+            String prefix;
+
+            if (personMd.equals(currentMd)) {
+                prefix = "] "; // Сегодняшний день рождения
+            } else if (personMd.isBefore(currentMd)) {
+                prefix = "- "; // День рождения уже прошел в этом году
+            } else {
+                prefix = "  "; // Предстоящий день рождения (пробелы для выравнивания)
             }
+
+            System.out.printf("%d. %s%s - %s\n",
+                    p.getId(),
+                    prefix,
+                    p.getName(),
+                    p.getBirthday().format(FORMATTER));
         }
     }
 
-    // Метод для показа сегодняшних и ближайших дней рождения
     void showTodayAndUpcomingBirthdays() throws SQLException {
         List<Person> upcomingBirthdays = dbManager.getTodayAndUpcomingBirthdays();
 
@@ -88,7 +108,6 @@ public class Menu {
         }
     }
 
-    // Метод для добавления нового дня рождения
     private void addNewBirthday() throws IOException, SQLException {
         System.out.print("Имя: ");
         String name = reader.readLine();
@@ -114,7 +133,6 @@ public class Menu {
         System.out.println("День рождения добавлен.");
     }
 
-    // Метод для редактирования существующего дня рождения
     private void editBirthday() throws IOException, SQLException {
         System.out.print("ID записи для изменения: ");
         int id = Integer.parseInt(reader.readLine());
@@ -153,7 +171,6 @@ public class Menu {
         System.out.println("Изменения сохранены.");
     }
 
-    // Метод для удаления дня рождения
     private void deleteBirthday() throws IOException, SQLException {
         System.out.print("ID записи для удаления: ");
         int id = Integer.parseInt(reader.readLine());
